@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
+import { API_ENDPOINTS, buildUrl, authenticatedFetch, handleApiError } from '@/lib/api';
 
 type EklemeYeri = 'magaza' | 'galeri';
 
@@ -70,15 +71,24 @@ export default function AdminPage() {
     setHata(null);
 
     try {
+      // Validate token exists
+      if (!token) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      }
+
       const resimUrlArray = magazaForm.resimUrl.split(',').map(url => url.trim()).filter(url => url !== '');
 
+      if (resimUrlArray.length === 0) {
+        throw new Error('En az bir resim URL\'si girmelisiniz');
+      }
+
       const payload = {
-        ad: magazaForm.ad,
-        kod: magazaForm.kod.toUpperCase(),
+        ad: magazaForm.ad.trim(),
+        kod: magazaForm.kod.toUpperCase().trim(),
         fiyat: parseFloat(magazaForm.fiyat),
         kategori: magazaForm.kategori,
-        aciklama: magazaForm.aciklama,
-        malzeme: magazaForm.malzeme,
+        aciklama: magazaForm.aciklama.trim(),
+        malzeme: magazaForm.malzeme.trim(),
         olculer: {
           genislik: magazaForm.genislik ? parseFloat(magazaForm.genislik) : undefined,
           yukseklik: magazaForm.yukseklik ? parseFloat(magazaForm.yukseklik) : undefined,
@@ -87,14 +97,11 @@ export default function AdminPage() {
         resimUrl: resimUrlArray
       };
 
-      const response = await fetch('http://localhost:5000/api/urunler', {
+      const url = buildUrl(API_ENDPOINTS.PRODUCTS);
+      const response = await authenticatedFetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token || ''
-        },
         body: JSON.stringify(payload)
-      });
+      }, token);
 
       const data = await response.json();
 
@@ -111,7 +118,7 @@ export default function AdminPage() {
       setTimeout(() => setBasari(null), 3000);
 
     } catch (error) {
-      setHata(error instanceof Error ? error.message : 'Bir hata oluştu');
+      setHata(handleApiError(error));
     } finally {
       setLoading(false);
     }
@@ -123,26 +130,32 @@ export default function AdminPage() {
     setHata(null);
 
     try {
+      // Validate token exists
+      if (!token) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      }
+
       const resimUrlArray = galeriForm.resimUrl.split(',').map(url => url.trim()).filter(url => url !== '');
 
+      if (resimUrlArray.length === 0) {
+        throw new Error('En az bir resim URL\'si girmelisiniz');
+      }
+
       const payload = {
-        baslik: galeriForm.baslik,
-        aciklama: galeriForm.aciklama,
+        baslik: galeriForm.baslik.trim(),
+        aciklama: galeriForm.aciklama.trim(),
         kategori: galeriForm.kategori,
-        musteriAdi: galeriForm.musteriAdi,
-        konum: galeriForm.konum,
+        musteriAdi: galeriForm.musteriAdi.trim(),
+        konum: galeriForm.konum.trim(),
         tamamlanmaTarihi: galeriForm.tamamlanmaTarihi || new Date().toISOString(),
         resimUrl: resimUrlArray
       };
 
-      const response = await fetch('http://localhost:5000/api/galeri', {
+      const url = buildUrl(API_ENDPOINTS.GALLERY);
+      const response = await authenticatedFetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token || ''
-        },
         body: JSON.stringify(payload)
-      });
+      }, token);
 
       const data = await response.json();
 
@@ -159,7 +172,7 @@ export default function AdminPage() {
       setTimeout(() => setBasari(null), 3000);
 
     } catch (error) {
-      setHata(error instanceof Error ? error.message : 'Bir hata oluştu');
+      setHata(handleApiError(error));
     } finally {
       setLoading(false);
     }

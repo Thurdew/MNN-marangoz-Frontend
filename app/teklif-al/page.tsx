@@ -100,7 +100,7 @@ export default function TeklifAlPage() {
   };
 
   return (
-    <main className="min-h-screen bg-linear-to-r from-amber-50 to-white py-20 px-4">
+    <main className="min-h-screen bg-gradient-to-r from-amber-50 to-white py-20 px-4">
       <div className="container mx-auto max-w-4xl">
         
         {/* Üst Başlık */}
@@ -350,7 +350,7 @@ export default function TeklifAlPage() {
                 <div className="max-w-2xl mx-auto space-y-6">
                   {/* Özet Kartları */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-linear-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,7 +364,7 @@ export default function TeklifAlPage() {
                       </div>
                     </div>
 
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,7 +380,7 @@ export default function TeklifAlPage() {
                       </div>
                     </div>
 
-                    <div className="bg-linear-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,7 +394,7 @@ export default function TeklifAlPage() {
                       </div>
                     </div>
 
-                    <div className="bg-linear-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,7 +412,7 @@ export default function TeklifAlPage() {
                   </div>
 
                   {/* Fiyat Kartı */}
-                  <div className="bg-linear-to-br from-amber-500 to-amber-600 p-8 rounded-2xl shadow-2xl text-white text-center">
+                  <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-8 rounded-2xl shadow-2xl text-white text-center">
                     <p className="text-lg mb-2 opacity-90">Tahmini Fiyat</p>
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-5xl md:text-6xl font-bold">

@@ -28,7 +28,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-linear-to-b from-gray-900 to-black text-gray-300">
+    <footer className="bg-gradient-to-b from-gray-900 to-black text-gray-300">
       {/* Üst Bölüm */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
@@ -36,7 +36,7 @@ export default function Footer() {
           {/* Logo ve Açıklama */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-12 h-12 bg-linear-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-2xl">🪚</span>
               </div>
               <div className="flex flex-col">

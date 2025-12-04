@@ -9,7 +9,7 @@ export default function HomePage() {
        {/* Arka Plan Görseli */}
 <div className="absolute inset-0 z-0">
   {/* Görsel yerine sadece gradient */}
-  <div className="absolute inset-0 bg-linear-to-br from-amber-900 via-neutral-800 to-stone-900" />
+  <div className="absolute inset-0 bg-gradient-to-br from-amber-900 via-neutral-800 to-stone-900" />
   
   {/* Ahşap doku pattern overlay */}
   <div 
@@ -20,7 +20,7 @@ export default function HomePage() {
   />
   
   {/* Koyu overlay katmanı */}
-  <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/50 to-black/70" />
+  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 </div>
         {/* İçerik Alanı */}
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,7 +37,7 @@ export default function HomePage() {
             {/* Ana Başlık */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 sm:mb-8 leading-tight">
               Hayalinizdeki Ahşabı
-              <span className="block mt-2 bg-linear-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
+              <span className="block mt-2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
                 Şekillendiriyoruz
               </span>
             </h1>
@@ -67,7 +67,7 @@ export default function HomePage() {
                   </svg>
                 </span>
                 {/* Hover efekti */}
-                <div className="absolute inset-0 bg-linear-to-r from-amber-600 to-amber-700 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-amber-700 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </Link>
 
               {/* İkincil Buton */}

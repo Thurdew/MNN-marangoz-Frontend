@@ -83,13 +83,16 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Menüyü Kapat' : 'Menüyü Aç'}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
             className={`lg:hidden p-2 rounded-lg transition-colors ${
               isScrolled
                 ? 'text-gray-800 hover:bg-gray-100'
                 : 'text-white hover:bg-white/10'
             }`}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -101,9 +104,11 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         <div
+          id="mobile-menu"
           className={`lg:hidden overflow-hidden transition-all duration-300 ${
             isMobileMenuOpen ? 'max-h-96 pb-6' : 'max-h-0'
           }`}
+          aria-hidden={!isMobileMenuOpen}
         >
           <div className="flex flex-col gap-4 pt-4">
             {navLinks.map((link) => (
