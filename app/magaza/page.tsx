@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SiparisButton from '../components/SiparisButton';
+import { useAuth } from '../contexts/AuthContext';
 
 // Node.js Backend'den gelen veri yapısı
 interface Urun {
@@ -11,7 +12,7 @@ interface Urun {
   kod: string;
   fiyat: number;
   aciklama: string;
-  resimUrl: string[];  // Array olarak tanımlı
+  resimUrl: string[];
   kategori: string;
   malzeme: string;
 }
@@ -20,6 +21,7 @@ export default function MagazaPage() {
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [loading, setLoading] = useState(true);
   const [hata, setHata] = useState('');
+  const { isAdmin } = useAuth(); // 🔐 Rol kontrolü eklendi
 
   useEffect(() => {
     console.log("Veri çekme işlemi başladı...");
@@ -73,7 +75,6 @@ export default function MagazaPage() {
     );
   }
 
-  // ✅ Resim URL'sini almak için helper fonksiyon
   const getImageUrl = (resimUrl: string | string[]): string => {
     if (Array.isArray(resimUrl)) {
       return resimUrl.length > 0 ? resimUrl[0] : 'https://via.placeholder.com/400x300?text=Resim+Yok';
@@ -127,15 +128,18 @@ export default function MagazaPage() {
             <span className="font-semibold">{urunler.length} Ürün Bulundu</span>
           </div>
 
-          <Link
-            href="/admin"
-            className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Yeni Ürün Ekle
-          </Link>
+          {/* 🔐 Sadece Admin Görür - Yeni Ürün Ekle Butonu */}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Yeni Ürün Ekle
+            </Link>
+          )}
         </div>
       </section>
 
@@ -247,17 +251,21 @@ export default function MagazaPage() {
                 Henüz Ürün Eklenmemiş
               </h3>
               <p className="text-gray-500 mb-6 max-w-sm">
-                Şu anda mağazamızda ürün bulunmamaktadır. Yeni ürün eklemek için admin panelini kullanın.
+                Şu anda mağazamızda ürün bulunmamaktadır.
               </p>
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                İlk Ürünü Ekle
-              </Link>
+              
+              {/* 🔐 Sadece Admin Görür - İlk Ürün Ekle */}
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  İlk Ürünü Ekle
+                </Link>
+              )}
             </div>
           </div>
         )}

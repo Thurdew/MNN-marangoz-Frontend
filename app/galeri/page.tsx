@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '../contexts/AuthContext';
 
 interface GaleriOgesi {
   _id: string;
@@ -18,6 +19,7 @@ export default function GaleriPage() {
   const [galeriOgeleri, setGaleriOgeleri] = useState<GaleriOgesi[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedKategori, setSelectedKategori] = useState<string>('Tümü');
+  const { isAdmin } = useAuth(); // 🔐 Rol kontrolü eklendi
 
   const kategoriler = ['Tümü', 'Mutfak', 'Yatak Odası', 'Salon', 'Banyo', 'Özel Tasarım', 'Diğer'];
 
@@ -152,16 +154,20 @@ export default function GaleriPage() {
           <div className="text-center py-20">
             <div className="inline-block p-8 bg-white rounded-2xl shadow-lg">
               <p className="text-xl text-gray-500 mb-4">
-                {selectedKategori === 'Tümü' 
-                  ? 'Henüz galeriye iş eklenmemiş' 
+                {selectedKategori === 'Tümü'
+                  ? 'Henüz galeriye iş eklenmemiş'
                   : 'Bu kategoride iş bulunamadı'}
               </p>
-              <Link
-                href="/admin-login"
-                className="inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors"
-              >
-                Admin Paneline Git
-              </Link>
+
+              {/* 🔐 Sadece Admin Görür - Admin Panel Linki */}
+              {isAdmin && (
+                <Link
+                  href="/admin-login"
+                  className="inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  Admin Paneline Git
+                </Link>
+              )}
             </div>
           </div>
         )}
