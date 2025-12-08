@@ -7,22 +7,33 @@ interface FormData {
   hizmet: string;
   genislik: number;
   yukseklik: number;
+  derinlik: number;
   malzeme: string;
+  ekOzellikler: string[];
 }
 
-// Hizmet seçenekleri
+// Hizmet seçenekleri (hizmetlere özel katsayılar eklendi)
 const hizmetler = [
-  { id: 'mutfak', name: 'Mutfak Dolabı', icon: '🍳', aciklama: 'Özel tasarım mutfak dolapları' },
-  { id: 'gardirop', name: 'Gardırop', icon: '👔', aciklama: 'Giyinme odası ve gardırop sistemleri' },
-  { id: 'vestiyer', name: 'Vestiyer', icon: '🚪', aciklama: 'Antre ve vestiyer çözümleri' },
-  { id: 'tv', name: 'TV Ünitesi', icon: '📺', aciklama: 'Modern TV ünite tasarımları' },
+  { id: 'mutfak', name: 'Mutfak Dolabı', icon: '🍳', aciklama: 'Özel tasarım mutfak dolapları', katsayi: 1.3, birimFiyat: 5500 },
+  { id: 'gardirop', name: 'Gardırop', icon: '👔', aciklama: 'Giyinme odası ve gardırop sistemleri', katsayi: 1.2, birimFiyat: 5000 },
+  { id: 'vestiyer', name: 'Vestiyer', icon: '🚪', aciklama: 'Antre ve vestiyer çözümleri', katsayi: 1.0, birimFiyat: 4500 },
+  { id: 'tv', name: 'TV Ünitesi', icon: '📺', aciklama: 'Modern TV ünite tasarımları', katsayi: 1.1, birimFiyat: 4800 },
 ];
 
-// Malzeme seçenekleri
+// Malzeme seçenekleri (detaylandırılmış)
 const malzemeler = [
-  { id: 'mdf', name: 'MDF', katsayi: 1, aciklama: 'Ekonomik ve dayanıklı', icon: '🪵' },
-  { id: 'lake', name: 'Lake', katsayi: 1.5, aciklama: 'Parlak ve şık görünüm', icon: '✨' },
-  { id: 'masif', name: 'Masif', katsayi: 2.5, aciklama: 'Premium ahşap malzeme', icon: '🌳' },
+  { id: 'mdf', name: 'MDF', katsayi: 1, aciklama: 'Ekonomik ve dayanıklı', icon: '🪵', garanti: '5 yıl' },
+  { id: 'lake', name: 'Lake', katsayi: 1.5, aciklama: 'Parlak ve şık görünüm', icon: '✨', garanti: '8 yıl' },
+  { id: 'masif', name: 'Masif', katsayi: 2.5, aciklama: 'Premium ahşap malzeme', icon: '🌳', garanti: '10 yıl' },
+  { id: 'akrilik', name: 'Akrilik', katsayi: 2.0, aciklama: 'Modern ve hijyenik', icon: '💎', garanti: '8 yıl' },
+];
+
+// Ek özellikler
+const ekOzellikler = [
+  { id: 'led', name: 'LED Aydınlatma', fiyat: 2500, icon: '💡' },
+  { id: 'softclose', name: 'Soft-Close Menteşe', fiyat: 1800, icon: '🔧' },
+  { id: 'cekmece', name: 'Ekstra Çekmece Sistemi', fiyat: 3500, icon: '📦' },
+  { id: 'ayna', name: 'Ayna Kaplama', fiyat: 4000, icon: '🪞' },
 ];
 
 export default function TeklifAlPage() {
@@ -31,31 +42,78 @@ export default function TeklifAlPage() {
     hizmet: 'Mutfak Dolabı',
     genislik: 200,
     yukseklik: 80,
+    derinlik: 60,
     malzeme: 'MDF',
+    ekOzellikler: [],
   });
   const [tahminiFiyat, setTahminiFiyat] = useState(0);
+  const [fiyatDetay, setFiyatDetay] = useState({
+    temelFiyat: 0,
+    malzemeFiyat: 0,
+    ekOzelliklerFiyat: 0,
+    toplamFiyat: 0
+  });
 
   // Formdaki değişikliklerini state'e kaydeder
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'genislik' || name === 'yukseklik' ? Number(value) : value,
+      [name]: name === 'genislik' || name === 'yukseklik' || name === 'derinlik' ? Number(value) : value,
     }));
   };
 
-  // Basit bir fiyat hesaplama mantığı
+  // Geliştirilmiş fiyat hesaplama mantığı
   const calculatePrice = () => {
-    let malzemeKatsayisi = 1;
-    if (formData.malzeme === 'Lake') malzemeKatsayisi = 1.5;
-    if (formData.malzeme === 'Masif') malzemeKatsayisi = 2.5;
+    // Seçilen hizmeti bul
+    const secilenHizmet = hizmetler.find(h => h.name === formData.hizmet) || hizmetler[0];
+
+    // Seçilen malzemeyi bul
+    const secilenMalzeme = malzemeler.find(m => m.name === formData.malzeme) || malzemeler[0];
+
+    // Metrekare hesapla (genişlik * yükseklik)
     const metrekare = (formData.genislik / 100) * (formData.yukseklik / 100);
-    const fiyat = (metrekare * 5000 * malzemeKatsayisi) + 1000;
-    return Math.round(fiyat);
+
+    // Derinlik katsayısı (60cm'den fazlaysa ekstra ücret)
+    const derinlikKatsayisi = formData.derinlik > 60 ? 1.2 : 1.0;
+
+    // Temel fiyat: metrekare * hizmet birim fiyat * hizmet katsayısı
+    const temelFiyat = Math.round(metrekare * secilenHizmet.birimFiyat * secilenHizmet.katsayi * derinlikKatsayisi);
+
+    // Malzeme fark fiyatı
+    const malzemeFiyat = Math.round(temelFiyat * (secilenMalzeme.katsayi - 1));
+
+    // Ek özellikler toplamı
+    const ekOzelliklerFiyat = formData.ekOzellikler.reduce((toplam, ozellikId) => {
+      const ozellik = ekOzellikler.find(ek => ek.id === ozellikId);
+      return toplam + (ozellik ? ozellik.fiyat : 0);
+    }, 0);
+
+    // Toplam fiyat
+    const toplamFiyat = temelFiyat + malzemeFiyat + ekOzelliklerFiyat;
+
+    setFiyatDetay({
+      temelFiyat,
+      malzemeFiyat,
+      ekOzelliklerFiyat,
+      toplamFiyat
+    });
+
+    return toplamFiyat;
+  };
+
+  // Ek özellik toggle fonksiyonu
+  const toggleEkOzellik = (ozellikId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      ekOzellikler: prev.ekOzellikler.includes(ozellikId)
+        ? prev.ekOzellikler.filter(id => id !== ozellikId)
+        : [...prev.ekOzellikler, ozellikId]
+    }));
   };
 
   const handleNext = () => {
-    if (step === 3) {
+    if (step === 4) {
       const fiyat = calculatePrice();
       setTahminiFiyat(fiyat);
     }
@@ -64,38 +122,30 @@ export default function TeklifAlPage() {
 
   const handleBack = () => setStep(step - 1);
 
-  // Formu Strapi'ye gönder
+  // Formu backend'e gönder
   const handleSubmit = async () => {
     const payload = {
       data: {
         MusteriAdi: "Teklif Test Müşterisi",
         MusteriTelefon: "555 000 0000",
         IstenenHizmet: formData.hizmet,
-        OlculerJSON: { genislik: formData.genislik, yukseklik: formData.yukseklik },
+        OlculerJSON: { genislik: formData.genislik, yukseklik: formData.yukseklik, derinlik: formData.derinlik },
         Malzeme: formData.malzeme,
+        EkOzellikler: formData.ekOzellikler,
         TahminiFiyat: tahminiFiyat,
         Durum: "Yeni"
       }
     };
 
     try {
-      const response = await fetch('http://localhost:1337/api/ozel-teklif-talebis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // Backend'e gönderilmek için hazır (şimdilik konsola yazdır)
+      console.log("Teklif Talebi:", payload);
 
-      if (!response.ok) {
-        const err = await response.json();
-        console.error("Strapi Hata Detayı:", err);
-        throw new Error(`API Hatası: ${response.status}`);
-      }
-
-      setStep(5);
+      setStep(6); // Başarı ekranına geç
 
     } catch (error) {
       console.error("Teklif Gönderme Hatası:", error);
-      alert("Teklif gönderilirken bir hata oluştu. Lütfen konsolu kontrol edin.");
+      alert("Teklif gönderilirken bir hata oluştu.");
     }
   };
 
@@ -120,36 +170,37 @@ export default function TeklifAlPage() {
         </div>
 
         {/* Progress Bar */}
-        {step < 5 && (
+        {step < 6 && (
           <div className="mb-12">
             <div className="flex justify-between items-center mb-4">
-              {[1, 2, 3, 4].map((num) => (
+              {[1, 2, 3, 4, 5].map((num) => (
                 <div key={num} className="flex-1 flex items-center">
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-full font-bold transition-all ${
-                    step >= num 
-                      ? 'bg-amber-500 text-white shadow-lg scale-110' 
+                  <div className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full font-bold transition-all text-sm md:text-base ${
+                    step >= num
+                      ? 'bg-amber-500 text-white shadow-lg scale-110'
                       : 'bg-gray-200 text-gray-500'
                   }`}>
                     {step > num ? (
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : (
                       num
                     )}
                   </div>
-                  {num < 4 && (
-                    <div className={`flex-1 h-1 mx-2 transition-all ${
+                  {num < 5 && (
+                    <div className={`flex-1 h-1 mx-1 md:mx-2 transition-all ${
                       step > num ? 'bg-amber-500' : 'bg-gray-200'
                     }`} />
                   )}
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-xs md:text-sm text-gray-600">
               <span>Hizmet</span>
               <span>Ölçüler</span>
               <span>Malzeme</span>
+              <span>Ekstralar</span>
               <span>Özet</span>
             </div>
           </div>
@@ -278,6 +329,39 @@ export default function TeklifAlPage() {
                     />
                   </div>
 
+                  {/* Derinlik */}
+                  <div className="bg-gray-50 p-6 rounded-xl">
+                    <label className="flex items-center gap-3 text-lg font-semibold text-gray-800 mb-4">
+                      <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                      Derinlik
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        name="derinlik"
+                        value={formData.derinlik}
+                        onChange={handleChange}
+                        className="w-full p-4 text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-all"
+                        min="30"
+                        max="100"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                        cm
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      name="derinlik"
+                      value={formData.derinlik}
+                      onChange={handleChange}
+                      min="30"
+                      max="100"
+                      className="w-full mt-4 accent-amber-500"
+                    />
+                  </div>
+
                   {/* Görsel Önizleme */}
                   <div className="bg-amber-50 p-6 rounded-xl border-2 border-amber-200">
                     <p className="text-center text-gray-700 mb-3 font-medium">
@@ -289,6 +373,9 @@ export default function TeklifAlPage() {
                       </span>
                       <span className="text-xl text-gray-600 ml-2">m²</span>
                     </div>
+                    <p className="text-center text-sm text-gray-600 mt-2">
+                      Derinlik: {formData.derinlik} cm
+                    </p>
                   </div>
                 </div>
               </div>
@@ -304,7 +391,7 @@ export default function TeklifAlPage() {
                   <p className="text-gray-600">Projeniz için uygun malzemeyi belirleyin</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {malzemeler.map((malzeme) => (
                     <button
                       key={malzeme.id}
@@ -319,7 +406,10 @@ export default function TeklifAlPage() {
                       <h3 className="text-xl font-bold text-gray-800 mb-2">
                         {malzeme.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3">{malzeme.aciklama}</p>
+                      <p className="text-sm text-gray-600 mb-2">{malzeme.aciklama}</p>
+                      <div className="text-xs text-gray-500 mb-3">
+                        Garanti: {malzeme.garanti}
+                      </div>
                       <div className="text-sm font-medium text-amber-600">
                         Katsayı: x{malzeme.katsayi}
                       </div>
@@ -337,8 +427,67 @@ export default function TeklifAlPage() {
               </div>
             )}
 
-            {/* Adım 4: Özet ve Onay */}
+            {/* Adım 4: Ek Özellikler */}
             {step === 4 && (
+              <div className="animate-fade-in">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                    Ek Özellikler
+                  </h2>
+                  <p className="text-gray-600">İsterseniz projenize ekstra özellikler ekleyin (opsiyonel)</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                  {ekOzellikler.map((ozellik) => {
+                    const isSelected = formData.ekOzellikler.includes(ozellik.id);
+                    return (
+                      <button
+                        key={ozellik.id}
+                        onClick={() => toggleEkOzellik(ozellik.id)}
+                        className={`p-6 rounded-xl border-2 transition-all transform hover:scale-105 hover:shadow-lg text-left ${
+                          isSelected
+                            ? 'border-green-500 bg-green-50 shadow-md'
+                            : 'border-gray-200 hover:border-green-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="text-4xl">{ozellik.icon}</div>
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isSelected ? 'border-green-500 bg-green-500' : 'border-gray-300'
+                          }`}>
+                            {isSelected && (
+                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">
+                          {ozellik.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl font-bold text-amber-600">
+                            +{ozellik.fiyat.toLocaleString('tr-TR')}₺
+                          </span>
+                          {isSelected && (
+                            <span className="text-sm text-green-600 font-semibold">Seçildi</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-8 text-center">
+                  <p className="text-sm text-gray-500">
+                    Seçilen ek özellik sayısı: <span className="font-bold text-amber-600">{formData.ekOzellikler.length}</span>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Adım 5: Özet ve Onay */}
+            {step === 5 && (
               <div className="animate-fade-in">
                 <div className="text-center mb-8">
                   <h2 className="text-3xl font-bold text-gray-800 mb-2">
@@ -411,16 +560,68 @@ export default function TeklifAlPage() {
                     </div>
                   </div>
 
-                  {/* Fiyat Kartı */}
-                  <div className="bg-linear-to-br from-amber-500 to-amber-600 p-8 rounded-2xl shadow-2xl text-white text-center">
-                    <p className="text-lg mb-2 opacity-90">Tahmini Fiyat</p>
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-5xl md:text-6xl font-bold">
-                        {tahminiFiyat.toLocaleString('tr-TR')}
-                      </span>
-                      <span className="text-3xl font-bold">₺</span>
+                  {/* Ek Özellikler Listesi */}
+                  {formData.ekOzellikler.length > 0 && (
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+                      <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Seçilen Ek Özellikler
+                      </h4>
+                      <ul className="space-y-2">
+                        {formData.ekOzellikler.map(ozellikId => {
+                          const ozellik = ekOzellikler.find(ek => ek.id === ozellikId);
+                          return ozellik ? (
+                            <li key={ozellikId} className="flex items-center justify-between text-gray-700">
+                              <span className="flex items-center gap-2">
+                                <span>{ozellik.icon}</span>
+                                <span>{ozellik.name}</span>
+                              </span>
+                              <span className="font-bold text-green-600">+{ozellik.fiyat.toLocaleString('tr-TR')}₺</span>
+                            </li>
+                          ) : null;
+                        })}
+                      </ul>
                     </div>
-                    <p className="mt-4 text-sm opacity-80">
+                  )}
+
+                  {/* Fiyat Detay Kartı */}
+                  <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-8 rounded-2xl shadow-2xl text-white">
+                    <h3 className="text-2xl font-bold mb-6 text-center">Fiyat Detayı</h3>
+
+                    <div className="space-y-3 mb-6">
+                      <div className="flex justify-between items-center pb-3 border-b border-white/30">
+                        <span className="opacity-90">Temel Fiyat</span>
+                        <span className="font-bold">{fiyatDetay.temelFiyat.toLocaleString('tr-TR')}₺</span>
+                      </div>
+
+                      {fiyatDetay.malzemeFiyat > 0 && (
+                        <div className="flex justify-between items-center pb-3 border-b border-white/30">
+                          <span className="opacity-90">Malzeme Ek Ücreti ({formData.malzeme})</span>
+                          <span className="font-bold">+{fiyatDetay.malzemeFiyat.toLocaleString('tr-TR')}₺</span>
+                        </div>
+                      )}
+
+                      {fiyatDetay.ekOzelliklerFiyat > 0 && (
+                        <div className="flex justify-between items-center pb-3 border-b border-white/30">
+                          <span className="opacity-90">Ek Özellikler</span>
+                          <span className="font-bold">+{fiyatDetay.ekOzelliklerFiyat.toLocaleString('tr-TR')}₺</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-center pt-4 border-t-2 border-white/50">
+                      <p className="text-lg mb-2 opacity-90">Toplam Tahmini Fiyat</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-5xl md:text-6xl font-bold">
+                          {fiyatDetay.toplamFiyat.toLocaleString('tr-TR')}
+                        </span>
+                        <span className="text-3xl font-bold">₺</span>
+                      </div>
+                    </div>
+
+                    <p className="mt-6 text-center text-sm opacity-80">
                       * Bu fiyat tahmini olup, keşif sonrası netleşecektir.
                     </p>
                   </div>
@@ -441,8 +642,8 @@ export default function TeklifAlPage() {
               </div>
             )}
 
-            {/* Adım 5: Başarı Ekranı */}
-            {step === 5 && (
+            {/* Adım 6: Başarı Ekranı */}
+            {step === 6 && (
               <div className="animate-fade-in text-center py-12">
                 <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -474,7 +675,7 @@ export default function TeklifAlPage() {
           </div>
 
           {/* Alt Navigasyon */}
-          {step < 5 && (
+          {step < 6 && (
             <div className="bg-gray-50 p-6 border-t border-gray-200">
               <div className="flex justify-between items-center">
                 {step > 1 ? (
@@ -491,7 +692,7 @@ export default function TeklifAlPage() {
                   <div></div>
                 )}
 
-                {step < 4 && (
+                {step < 5 && (
                   <button
                     onClick={handleNext}
                     className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ml-auto"
@@ -503,7 +704,7 @@ export default function TeklifAlPage() {
                   </button>
                 )}
 
-                {step === 4 && (
+                {step === 5 && (
                   <button
                     onClick={handleSubmit}
                     className="flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ml-auto text-lg"
@@ -520,7 +721,7 @@ export default function TeklifAlPage() {
         </div>
 
         {/* Yardım Bölümü */}
-        {step < 5 && (
+        {step < 6 && (
           <div className="mt-8 text-center">
             <p className="text-gray-600 mb-2">Yardıma mı ihtiyacınız var?</p>
             <Link href="/iletisim" className="text-amber-600 hover:text-amber-700 font-semibold">
