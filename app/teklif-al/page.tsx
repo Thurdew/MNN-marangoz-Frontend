@@ -10,14 +10,15 @@ interface FormData {
   derinlik: number;
   malzeme: string;
   ekOzellikler: string[];
+  cekmeceAdedi: number;
 }
 
 // Hizmet seçenekleri (hizmetlere özel katsayılar eklendi)
 const hizmetler = [
-  { id: 'mutfak', name: 'Mutfak Dolabı', icon: '🍳', aciklama: 'Özel tasarım mutfak dolapları', katsayi: 1.3, birimFiyat: 5500 },
-  { id: 'gardirop', name: 'Gardırop', icon: '👔', aciklama: 'Giyinme odası ve gardırop sistemleri', katsayi: 1.2, birimFiyat: 5000 },
-  { id: 'vestiyer', name: 'Vestiyer', icon: '🚪', aciklama: 'Antre ve vestiyer çözümleri', katsayi: 1.0, birimFiyat: 4500 },
-  { id: 'tv', name: 'TV Ünitesi', icon: '📺', aciklama: 'Modern TV ünite tasarımları', katsayi: 1.1, birimFiyat: 4800 },
+  { id: 'mutfak', name: 'Mutfak Dolabı', icon: '🍳', aciklama: 'Özel tasarım mutfak dolapları', katsayi: 1.3, birimFiyat: 11000 },
+  { id: 'gardirop', name: 'Gardırop', icon: '👔', aciklama: 'Giyinme odası ve gardırop sistemleri', katsayi: 1.2, birimFiyat: 11000 },
+  { id: 'vestiyer', name: 'Vestiyer', icon: '🚪', aciklama: 'Antre ve vestiyer çözümleri', katsayi: 1.0, birimFiyat: 11000 },
+  { id: 'tv', name: 'TV Ünitesi', icon: '📺', aciklama: 'Modern TV ünite tasarımları', katsayi: 1.1, birimFiyat: 11000 },
 ];
 
 // Malzeme seçenekleri (detaylandırılmış)
@@ -30,10 +31,8 @@ const malzemeler = [
 
 // Ek özellikler
 const ekOzellikler = [
-  { id: 'led', name: 'LED Aydınlatma', fiyat: 2500, icon: '💡' },
-  { id: 'softclose', name: 'Soft-Close Menteşe', fiyat: 1800, icon: '🔧' },
-  { id: 'cekmece', name: 'Ekstra Çekmece Sistemi', fiyat: 3500, icon: '📦' },
-  { id: 'ayna', name: 'Ayna Kaplama', fiyat: 4000, icon: '🪞' },
+  { id: 'cnc', name: 'CNC İşleme', fiyat: 5000, icon: '⚙️', aciklama: 'Hassas CNC kesim ve işleme' },
+  { id: 'ayna', name: 'Ayna Kaplama', fiyat: 4000, icon: '🪞', aciklama: 'Dekoratif ayna kaplama' },
 ];
 
 export default function TeklifAlPage() {
@@ -45,12 +44,14 @@ export default function TeklifAlPage() {
     derinlik: 60,
     malzeme: 'MDF',
     ekOzellikler: [],
+    cekmeceAdedi: 3,
   });
   const [tahminiFiyat, setTahminiFiyat] = useState(0);
   const [fiyatDetay, setFiyatDetay] = useState({
     temelFiyat: 0,
     malzemeFiyat: 0,
     ekOzelliklerFiyat: 0,
+    cekmeceFiyat: 0,
     toplamFiyat: 0
   });
 
@@ -59,7 +60,7 @@ export default function TeklifAlPage() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'genislik' || name === 'yukseklik' || name === 'derinlik' ? Number(value) : value,
+      [name]: name === 'genislik' || name === 'yukseklik' || name === 'derinlik' || name === 'cekmeceAdedi' ? Number(value) : value,
     }));
   };
 
@@ -89,13 +90,17 @@ export default function TeklifAlPage() {
       return toplam + (ozellik ? ozellik.fiyat : 0);
     }, 0);
 
+    // Çekmece ücreti (3 çekmece ücretsiz, sonrası her çekmece 1000 TL)
+    const cekmeceFiyat = formData.cekmeceAdedi > 3 ? (formData.cekmeceAdedi - 3) * 1000 : 0;
+
     // Toplam fiyat
-    const toplamFiyat = temelFiyat + malzemeFiyat + ekOzelliklerFiyat;
+    const toplamFiyat = temelFiyat + malzemeFiyat + ekOzelliklerFiyat + cekmeceFiyat;
 
     setFiyatDetay({
       temelFiyat,
       malzemeFiyat,
       ekOzelliklerFiyat,
+      cekmeceFiyat,
       toplamFiyat
     });
 
@@ -427,16 +432,62 @@ export default function TeklifAlPage() {
               </div>
             )}
 
-            {/* Adım 4: Ek Özellikler */}
+            {/* Adım 4: Ek Özellikler ve Çekmece */}
             {step === 4 && (
               <div className="animate-fade-in">
                 <div className="text-center mb-8">
                   <h2 className="text-3xl font-bold text-gray-800 mb-2">
                     Ek Özellikler
                   </h2>
-                  <p className="text-gray-600">İsterseniz projenize ekstra özellikler ekleyin (opsiyonel)</p>
+                  <p className="text-gray-600">İsterseniz projenize ekstra özellikler ekleyin</p>
                 </div>
 
+                {/* Çekmece Sayısı Seçimi */}
+                <div className="max-w-md mx-auto mb-8 bg-amber-50 p-6 rounded-xl border-2 border-amber-200">
+                  <label className="flex items-center gap-3 text-lg font-semibold text-gray-800 mb-4">
+                    <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    Çekmece Sayısı
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="cekmeceAdedi"
+                      value={formData.cekmeceAdedi}
+                      onChange={handleChange}
+                      className="w-full p-4 text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-all"
+                      min="0"
+                      max="20"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                      adet
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    name="cekmeceAdedi"
+                    value={formData.cekmeceAdedi}
+                    onChange={handleChange}
+                    min="0"
+                    max="20"
+                    className="w-full mt-4 accent-amber-500"
+                  />
+                  <p className="text-sm text-gray-600 mt-3 text-center">
+                    {formData.cekmeceAdedi <= 3 ? (
+                      <span className="text-green-600 font-semibold">
+                        ✓ İlk 3 çekmece ücretsiz
+                      </span>
+                    ) : (
+                      <span>
+                        İlk 3 ücretsiz, <span className="font-bold text-amber-600">{formData.cekmeceAdedi - 3} çekmece</span> için
+                        <span className="font-bold text-amber-600"> +{((formData.cekmeceAdedi - 3) * 1000).toLocaleString('tr-TR')}₺</span>
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Ek Özellikler */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                   {ekOzellikler.map((ozellik) => {
                     const isSelected = formData.ekOzellikler.includes(ozellik.id);
@@ -465,6 +516,7 @@ export default function TeklifAlPage() {
                         <h3 className="text-lg font-bold text-gray-800 mb-2">
                           {ozellik.name}
                         </h3>
+                        <p className="text-sm text-gray-600 mb-3">{ozellik.aciklama}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold text-amber-600">
                             +{ozellik.fiyat.toLocaleString('tr-TR')}₺
@@ -607,6 +659,13 @@ export default function TeklifAlPage() {
                         <div className="flex justify-between items-center pb-3 border-b border-white/30">
                           <span className="opacity-90">Ek Özellikler</span>
                           <span className="font-bold">+{fiyatDetay.ekOzelliklerFiyat.toLocaleString('tr-TR')}₺</span>
+                        </div>
+                      )}
+
+                      {fiyatDetay.cekmeceFiyat > 0 && (
+                        <div className="flex justify-between items-center pb-3 border-b border-white/30">
+                          <span className="opacity-90">Ekstra Çekmece ({formData.cekmeceAdedi - 3} adet)</span>
+                          <span className="font-bold">+{fiyatDetay.cekmeceFiyat.toLocaleString('tr-TR')}₺</span>
                         </div>
                       )}
                     </div>
