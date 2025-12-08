@@ -41,7 +41,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-xl text-white leading-tight">
-                  Ahşap Atölye
+                  MNN Marangozluk
                 </span>
                 <span className="text-xs text-amber-400">
                   Ustalık ve Kalite
@@ -179,8 +179,8 @@ export default function Footer() {
                 <svg className="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:info@ahsapatolye.com" className="hover:text-amber-400 transition-colors">
-                  info@ahsapatolye.com
+                <a href="mailto:info@mnnmarangozluk.com" className="hover:text-amber-400 transition-colors">
+                  info@mnnmarangozluk.com
                 </a>
               </li>
             </ul>
@@ -193,7 +193,7 @@ export default function Footer() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-500 text-center md:text-left">
-              © {currentYear} Ahşap Atölye. Tüm hakları saklıdır.
+              © {currentYear} MNN Marangozluk. Tüm hakları saklıdır.
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
               <Link href="/gizlilik" className="text-gray-500 hover:text-amber-400 transition-colors">

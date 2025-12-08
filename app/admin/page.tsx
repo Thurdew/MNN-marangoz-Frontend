@@ -238,6 +238,12 @@ export default function AdminPage() {
           >
             🖼️ Galeriye İş Ekle
           </button>
+          <Link
+            href="/admin/ayarlar"
+            className="flex-1 py-4 rounded-xl font-bold text-lg transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 text-center flex items-center justify-center"
+          >
+            ⚙️ Fiyat Ayarları
+          </Link>
         </div>
       </section>
 

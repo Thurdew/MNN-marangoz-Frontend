@@ -42,7 +42,7 @@ export default function Navbar() {
               <span className={`font-bold text-xl leading-tight transition-colors ${
                 isScrolled ? 'text-gray-800' : 'text-white'
               }`}>
-                Ahşap Atölye
+                MNN Marangozluk
               </span>
               <span className={`text-xs transition-colors ${
                 isScrolled ? 'text-amber-600' : 'text-amber-300'

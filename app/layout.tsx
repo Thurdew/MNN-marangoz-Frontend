@@ -5,7 +5,7 @@ import ClientLayout from "./ClientLayout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Ahşap Atölye - El İşçiliği Mobilya",
+  title: "MNN Marangozluk - El İşçiliği Mobilya",
   description: "30 yıllık deneyim ile özel tasarım mobilyalar",
 };
 
