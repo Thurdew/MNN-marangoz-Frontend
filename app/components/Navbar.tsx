@@ -73,7 +73,7 @@ export default function Navbar() {
           {/* Teklif Al Butonu */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
-              href="/iletisim"
+              href="/teklif-al"
               className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
             >
               Teklif Al
@@ -122,7 +122,7 @@ export default function Navbar() {
             ))}
             
             <Link
-              href="/iletisim"
+              href="/teklif-al"
               onClick={() => setIsMobileMenuOpen(false)}
               className="mx-4 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-colors text-center"
             >
