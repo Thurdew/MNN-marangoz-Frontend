@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
+import ImageUploader from '../components/ImageUploader';
 
 type EklemeYeri = 'magaza' | 'galeri';
 
@@ -13,8 +14,11 @@ export default function AdminPage() {
   
   const [eklemeYeri, setEklemeYeri] = useState<EklemeYeri>('magaza');
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [basari, setBasari] = useState<string | null>(null);
+  const [magazaImageUrls, setMagazaImageUrls] = useState<string[]>([]);
+  const [galeriImageUrls, setGaleriImageUrls] = useState<string[]>([]);
 
   // Mağaza için form data
   const [magazaForm, setMagazaForm] = useState({
@@ -64,6 +68,62 @@ export default function AdminPage() {
     setBasari(null);
   };
 
+  // Resim yükleme fonksiyonu
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    if (files.length === 0) return [];
+
+    setUploadingImages(true);
+    setHata(null);
+
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': token || ''
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Resimler yüklenirken hata oluştu');
+      }
+
+      // Backend'den dönen URL'leri tam URL'ye çevir
+      const fullUrls = data.urls.map((url: string) => `http://localhost:5000${url}`);
+      return fullUrls;
+    } catch (error) {
+      setHata(error instanceof Error ? error.message : 'Resim yükleme hatası');
+      return [];
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  // Mağaza resimleri seçildiğinde
+  const handleMagazaImagesSelected = async (files: File[]) => {
+    const urls = await uploadImages(files);
+    if (urls.length > 0) {
+      setMagazaImageUrls(urls);
+      setMagazaForm(prev => ({ ...prev, resimUrl: urls.join(', ') }));
+    }
+  };
+
+  // Galeri resimleri seçildiğinde
+  const handleGaleriImagesSelected = async (files: File[]) => {
+    const urls = await uploadImages(files);
+    if (urls.length > 0) {
+      setGaleriImageUrls(urls);
+      setGaleriForm(prev => ({ ...prev, resimUrl: urls.join(', ') }));
+    }
+  };
+
   const handleMagazaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -107,6 +167,7 @@ export default function AdminPage() {
         ad: '', kod: '', fiyat: '', kategori: 'Mutfak', aciklama: '',
         malzeme: '', genislik: '', yukseklik: '', derinlik: '', resimUrl: ''
       });
+      setMagazaImageUrls([]);
 
       setTimeout(() => setBasari(null), 3000);
 
@@ -155,6 +216,7 @@ export default function AdminPage() {
         baslik: '', aciklama: '', kategori: 'Mutfak',
         musteriAdi: '', konum: '', tamamlanmaTarihi: '', resimUrl: ''
       });
+      setGaleriImageUrls([]);
 
       setTimeout(() => setBasari(null), 3000);
 
@@ -217,32 +279,44 @@ export default function AdminPage() {
 
       {/* Seçim Butonları */}
       <section className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto flex gap-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <button
             onClick={() => setEklemeYeri('magaza')}
-            className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
+            className={`py-4 rounded-xl font-bold text-base transition-all ${
               eklemeYeri === 'magaza'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
             }`}
           >
-            🛒 Mağazaya Ürün Ekle
+            🛒 Mağaza
           </button>
           <button
             onClick={() => setEklemeYeri('galeri')}
-            className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
+            className={`py-4 rounded-xl font-bold text-base transition-all ${
               eklemeYeri === 'galeri'
                 ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-300'
             }`}
           >
-            🖼️ Galeriye İş Ekle
+            🖼️ Galeri
           </button>
           <Link
             href="/admin/ayarlar"
-            className="flex-1 py-4 rounded-xl font-bold text-lg transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 text-center flex items-center justify-center"
+            className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 text-center flex items-center justify-center"
           >
-            ⚙️ Fiyat Ayarları
+            ⚙️ Ayarlar
+          </Link>
+          <Link
+            href="/admin/siparisler"
+            className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 text-center flex items-center justify-center"
+          >
+            📦 Siparişler
+          </Link>
+          <Link
+            href="/admin/teklifler"
+            className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-300 text-center flex items-center justify-center"
+          >
+            📋 Teklifler
           </Link>
         </div>
       </section>
@@ -403,16 +477,19 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Resim URL'leri * (virgülle ayırın)</label>
-                  <input
-                    type="text"
-                    name="resimUrl"
-                    value={magazaForm.resimUrl}
-                    onChange={handleMagazaChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
-                    placeholder="https://example.com/1.jpg, https://example.com/2.jpg"
+                  <label className="block text-sm font-semibold text-gray-700 mb-4">
+                    Ürün Resimleri * {uploadingImages && <span className="text-amber-600">(Yükleniyor...)</span>}
+                  </label>
+                  <ImageUploader
+                    onImagesSelected={handleMagazaImagesSelected}
+                    multiple={true}
+                    maxFiles={10}
                   />
+                  {magazaImageUrls.length > 0 && (
+                    <p className="mt-3 text-sm text-green-600 font-semibold">
+                      ✓ {magazaImageUrls.length} resim yüklendi
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -510,16 +587,19 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Resim URL'leri * (virgülle ayırın)</label>
-                  <input
-                    type="text"
-                    name="resimUrl"
-                    value={galeriForm.resimUrl}
-                    onChange={handleGaleriChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="https://example.com/1.jpg, https://example.com/2.jpg"
+                  <label className="block text-sm font-semibold text-gray-700 mb-4">
+                    İş Resimleri * {uploadingImages && <span className="text-amber-600">(Yükleniyor...)</span>}
+                  </label>
+                  <ImageUploader
+                    onImagesSelected={handleGaleriImagesSelected}
+                    multiple={true}
+                    maxFiles={10}
                   />
+                  {galeriImageUrls.length > 0 && (
+                    <p className="mt-3 text-sm text-green-600 font-semibold">
+                      ✓ {galeriImageUrls.length} resim yüklendi
+                    </p>
+                  )}
                 </div>
 
                 <button
