@@ -357,7 +357,7 @@ export default function AdminPage() {
                       value={magazaForm.ad}
                       onChange={handleMagazaChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                       placeholder="Modern Mutfak Dolabı"
                     />
                   </div>
@@ -370,7 +370,7 @@ export default function AdminPage() {
                       value={magazaForm.kod}
                       onChange={handleMagazaChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none uppercase"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none uppercase"
                       placeholder="URN-001"
                     />
                   </div>
@@ -387,7 +387,7 @@ export default function AdminPage() {
                       required
                       min="0"
                       step="0.01"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="25000"
                     />
                   </div>
@@ -399,7 +399,7 @@ export default function AdminPage() {
                       value={magazaForm.kategori}
                       onChange={handleMagazaChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                     >
                       {kategoriler.map(kat => (
                         <option key={kat} value={kat}>{kat}</option>
@@ -416,7 +416,7 @@ export default function AdminPage() {
                     value={magazaForm.malzeme}
                     onChange={handleMagazaChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                     placeholder="Birinci Sınıf MDF"
                   />
                 </div>
@@ -429,7 +429,7 @@ export default function AdminPage() {
                     onChange={handleMagazaChange}
                     required
                     rows={4}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none resize-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none resize-none"
                     placeholder="Ürün açıklaması..."
                   />
                 </div>
@@ -444,7 +444,7 @@ export default function AdminPage() {
                       onChange={handleMagazaChange}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="200"
                     />
                   </div>
@@ -457,7 +457,7 @@ export default function AdminPage() {
                       onChange={handleMagazaChange}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="80"
                     />
                   </div>
@@ -470,7 +470,7 @@ export default function AdminPage() {
                       onChange={handleMagazaChange}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="60"
                     />
                   </div>
@@ -515,7 +515,7 @@ export default function AdminPage() {
                     value={galeriForm.baslik}
                     onChange={handleGaleriChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                     placeholder="Özel Tasarım Mutfak Projesi"
                   />
                 </div>
@@ -528,7 +528,7 @@ export default function AdminPage() {
                       value={galeriForm.kategori}
                       onChange={handleGaleriChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                     >
                       {kategoriler.map(kat => (
                         <option key={kat} value={kat}>{kat}</option>
@@ -543,7 +543,7 @@ export default function AdminPage() {
                       name="tamamlanmaTarihi"
                       value={galeriForm.tamamlanmaTarihi}
                       onChange={handleGaleriChange}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                     />
                   </div>
                 </div>
@@ -556,7 +556,7 @@ export default function AdminPage() {
                       name="musteriAdi"
                       value={galeriForm.musteriAdi}
                       onChange={handleGaleriChange}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                       placeholder="Ahmet Yılmaz"
                     />
                   </div>
@@ -568,7 +568,7 @@ export default function AdminPage() {
                       name="konum"
                       value={galeriForm.konum}
                       onChange={handleGaleriChange}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                       placeholder="İstanbul, Türkiye"
                     />
                   </div>
@@ -581,7 +581,7 @@ export default function AdminPage() {
                     value={galeriForm.aciklama}
                     onChange={handleGaleriChange}
                     rows={4}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none resize-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none resize-none"
                     placeholder="İş hakkında detaylı açıklama..."
                   />
                 </div>

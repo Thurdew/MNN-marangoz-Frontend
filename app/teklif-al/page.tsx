@@ -135,28 +135,49 @@ export default function TeklifAlPage() {
 
   // Formu backend'e gönder
   const handleSubmit = async () => {
+    // Validation
+    if (!formData.adSoyad || !formData.telefon || !formData.email) {
+      alert('Lütfen tüm iletişim bilgilerini doldurun.');
+      return;
+    }
+
     const payload = {
-      data: {
-        MusteriAdi: "Teklif Test Müşterisi",
-        MusteriTelefon: "555 000 0000",
-        IstenenHizmet: formData.hizmet,
-        OlculerJSON: { genislik: formData.genislik, yukseklik: formData.yukseklik, derinlik: formData.derinlik },
-        Malzeme: formData.malzeme,
-        EkOzellikler: formData.ekOzellikler,
-        TahminiFiyat: tahminiFiyat,
-        Durum: "Yeni"
-      }
+      hizmet: formData.hizmet,
+      genislik: formData.genislik,
+      yukseklik: formData.yukseklik,
+      derinlik: formData.derinlik,
+      malzeme: formData.malzeme.toLowerCase(),
+      ekOzellikler: formData.ekOzellikler,
+      cekmeceAdedi: formData.cekmeceAdedi,
+      adSoyad: formData.adSoyad,
+      telefon: formData.telefon,
+      email: formData.email,
+      adres: formData.adres,
+      fiyatDetay: fiyatDetay,
+      durum: 'beklemede'
     };
 
     try {
-      // Backend'e gönderilmek için hazır (şimdilik konsola yazdır)
-      console.log("Teklif Talebi:", payload);
+      const response = await fetch('http://localhost:5000/api/teklifler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
 
-      setStep(6); // Başarı ekranına geç
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Teklif gönderilirken hata oluştu');
+      }
+
+      console.log("Teklif başarıyla gönderildi:", data);
+      setStep(7); // Başarı ekranına geç
 
     } catch (error) {
       console.error("Teklif Gönderme Hatası:", error);
-      alert("Teklif gönderilirken bir hata oluştu.");
+      alert(error instanceof Error ? error.message : "Teklif gönderilirken bir hata oluştu.");
     }
   };
 
@@ -798,8 +819,8 @@ export default function TeklifAlPage() {
               </div>
             )}
 
-            {/* Adım 6: Başarı Ekranı */}
-            {step === 6 && (
+            {/* Adım 7: Başarı Ekranı */}
+            {step === 7 && (
               <div className="animate-fade-in text-center py-12">
                 <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -831,7 +852,7 @@ export default function TeklifAlPage() {
           </div>
 
           {/* Alt Navigasyon */}
-          {step < 6 && (
+          {step < 7 && (
             <div className="bg-gray-50 p-6 border-t border-gray-200">
               <div className="flex justify-between items-center">
                 {step > 1 ? (
@@ -877,7 +898,7 @@ export default function TeklifAlPage() {
         </div>
 
         {/* Yardım Bölümü */}
-        {step < 6 && (
+        {step < 7 && (
           <div className="mt-8 text-center">
             <p className="text-gray-600 mb-2">Yardıma mı ihtiyacınız var?</p>
             <Link href="/iletisim" className="text-amber-600 hover:text-amber-700 font-semibold">
