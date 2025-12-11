@@ -157,8 +157,10 @@ export default function TeklifAlPage() {
       durum: 'beklemede'
     };
 
+    console.log("Gönderilen payload:", payload);
+
     try {
-      const response = await fetch('http://localhost:5000/api/teklifler', {
+      const response = await fetch('http://localhost:5000/api/teklif', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +171,8 @@ export default function TeklifAlPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Teklif gönderilirken hata oluştu');
+        console.error("Backend hatası detayı:", data);
+        throw new Error(data.message || data.error || 'Teklif gönderilirken hata oluştu');
       }
 
       console.log("Teklif başarıyla gönderildi:", data);
