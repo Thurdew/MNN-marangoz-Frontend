@@ -24,10 +24,33 @@ export default function GaleriPage() {
   const kategoriler = ['Tümü', 'Mutfak', 'Yatak Odası', 'Salon', 'Banyo', 'Özel Tasarım', 'Diğer'];
 
   useEffect(() => {
+    console.log("Galeri verileri yükleniyor...");
+
     fetch('http://localhost:5000/api/galeri')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
+        return res.json();
+      })
       .then(data => {
-        setGaleriOgeleri(data);
+        console.log("Gelen Galeri Verileri:", data);
+
+        // Backend'den gelen veri formatını handle et
+        // Backend farklı formatlarda response dönebilir: array, {data: array}, {success: true, data: array}
+        let galeriData = [];
+
+        if (Array.isArray(data)) {
+          // Direkt array geliyorsa
+          galeriData = data;
+        } else if (data.data && Array.isArray(data.data)) {
+          // {data: array} formatında geliyorsa
+          galeriData = data.data;
+        } else if (data.galeri && Array.isArray(data.galeri)) {
+          // {galeri: array} formatında geliyorsa
+          galeriData = data.galeri;
+        }
+
+        console.log("İşlenen Galeri Öğeleri:", galeriData);
+        setGaleriOgeleri(galeriData);
         setLoading(false);
       })
       .catch(err => {

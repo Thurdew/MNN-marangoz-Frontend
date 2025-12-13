@@ -25,7 +25,7 @@ export default function MagazaPage() {
 
   useEffect(() => {
     console.log("Veri çekme işlemi başladı...");
-    
+
     fetch('http://localhost:5000/api/urunler')
       .then(res => {
         if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
@@ -33,7 +33,24 @@ export default function MagazaPage() {
       })
       .then(data => {
         console.log("Gelen Veriler:", data);
-        setUrunler(data);
+
+        // Backend'den gelen veri formatını handle et
+        // Backend farklı formatlarda response dönebilir: array, {data: array}, {success: true, data: array}
+        let urunlerData = [];
+
+        if (Array.isArray(data)) {
+          // Direkt array geliyorsa
+          urunlerData = data;
+        } else if (data.data && Array.isArray(data.data)) {
+          // {data: array} formatında geliyorsa
+          urunlerData = data.data;
+        } else if (data.urunler && Array.isArray(data.urunler)) {
+          // {urunler: array} formatında geliyorsa
+          urunlerData = data.urunler;
+        }
+
+        console.log("İşlenen Ürünler:", urunlerData);
+        setUrunler(urunlerData);
         setLoading(false);
       })
       .catch(err => {
