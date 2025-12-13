@@ -67,20 +67,30 @@ export default function TekliflerPage() {
   const fetchTeklifler = async () => {
     try {
       setLoading(true);
+      console.log("Teklifler getiriliyor, token:", token ? "Mevcut" : "Yok");
+
       const response = await fetch('http://localhost:5000/api/teklif', {
         headers: {
-          'Authorization': token || ''
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
         }
       });
 
       const data = await response.json();
+      console.log("Backend'den gelen response:", data);
 
       if (!response.ok) {
+        console.error("Backend hatası:", data);
         throw new Error(data.message || 'Teklifler yüklenirken hata oluştu');
       }
 
-      setTeklifler(data.data || []);
+      // Backend'den gelen veriyi farklı formatlarda handle et
+      const tekliflerData = Array.isArray(data) ? data : (data.data || data.teklifler || []);
+      console.log("Yüklenen teklifler sayısı:", tekliflerData.length);
+
+      setTeklifler(tekliflerData);
     } catch (error) {
+      console.error("Teklif yükleme hatası:", error);
       setHata(error instanceof Error ? error.message : 'Bir hata oluştu');
     } finally {
       setLoading(false);
