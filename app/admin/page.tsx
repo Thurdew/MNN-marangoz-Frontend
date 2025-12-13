@@ -72,6 +72,12 @@ export default function AdminPage() {
   const uploadImages = async (files: File[]): Promise<string[]> => {
     if (files.length === 0) return [];
 
+    if (!token) {
+      alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+      router.push('/admin-login');
+      return [];
+    }
+
     setUploadingImages(true);
     setHata(null);
 
@@ -84,10 +90,16 @@ export default function AdminPage() {
       const response = await fetch('http://localhost:5000/api/upload', {
         method: 'POST',
         headers: {
-          'Authorization': token || ''
+          'Authorization': `Bearer ${token}`
         },
         body: formData
       });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return [];
+      }
 
       const data = await response.json();
 
@@ -129,6 +141,12 @@ export default function AdminPage() {
     setLoading(true);
     setHata(null);
 
+    if (!token) {
+      alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+      router.push('/admin-login');
+      return;
+    }
+
     try {
       const resimUrlArray = magazaForm.resimUrl.split(',').map(url => url.trim()).filter(url => url !== '');
 
@@ -151,10 +169,16 @@ export default function AdminPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token || ''
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return;
+      }
 
       const data = await response.json();
 
@@ -183,6 +207,12 @@ export default function AdminPage() {
     setLoading(true);
     setHata(null);
 
+    if (!token) {
+      alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+      router.push('/admin-login');
+      return;
+    }
+
     try {
       const resimUrlArray = galeriForm.resimUrl.split(',').map(url => url.trim()).filter(url => url !== '');
 
@@ -200,10 +230,16 @@ export default function AdminPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token || ''
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return;
+      }
 
       const data = await response.json();
 

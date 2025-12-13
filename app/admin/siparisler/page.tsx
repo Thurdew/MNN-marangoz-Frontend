@@ -52,11 +52,25 @@ export default function SiparislerPage() {
   const fetchSiparisler = async () => {
     try {
       setLoading(true);
+
+      if (!token) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        router.push('/admin-login');
+        return;
+      }
+
       const response = await fetch('http://localhost:5000/api/siparisler', {
         headers: {
-          'Authorization': token || ''
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return;
+      }
 
       const data = await response.json();
 
