@@ -156,7 +156,7 @@ export default function MagazaPage() {
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                       loading="lazy"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x300?text=Resim+Yok";
+                        (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%239ca3af'%3EResim Yüklenemedi%3C/text%3E%3C/svg%3E";
                       }}
                     />
                     

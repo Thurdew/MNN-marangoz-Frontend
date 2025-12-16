@@ -31,6 +31,10 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
     return `http://localhost:5000${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
+  // SVG fallback resim (network isteği yok)
+  const fallbackImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='400'%3E%3Crect width='500' height='400' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%239ca3af'%3EResim Yüklenemedi%3C/text%3E%3C/svg%3E";
+  const fallbackThumbnail = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%239ca3af'%3EX%3C/text%3E%3C/svg%3E";
+
   return (
     <div className="space-y-4">
       {/* Büyük Resim */}
@@ -40,7 +44,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
           alt="Ürün Görseli"
           className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-105"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/500x400?text=Resim+Yüklenemedi';
+            (e.target as HTMLImageElement).src = fallbackImage;
           }}
         />
       </div>
@@ -62,7 +66,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
               alt={img.name || `Resim ${index + 1}`}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x80?text=X';
+                (e.target as HTMLImageElement).src = fallbackThumbnail;
               }}
             />
           </button>
