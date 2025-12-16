@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '../contexts/AuthContext';
 
 interface GaleriOgesi {
   _id: string;
@@ -19,13 +17,24 @@ export default function GaleriPage() {
   const [galeriOgeleri, setGaleriOgeleri] = useState<GaleriOgesi[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedKategori, setSelectedKategori] = useState<string>('Tümü');
-  const { isAdmin } = useAuth(); // 🔐 Rol kontrolü eklendi
 
   const kategoriler = ['Tümü', 'Mutfak', 'Yatak Odası', 'Salon', 'Banyo', 'Özel Tasarım', 'Diğer'];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/galeri')
-      .then(res => res.json())
+    // localStorage'dan token'ı al (varsa)
+    const token = localStorage.getItem('token');
+    const headers: HeadersInit = {};
+
+    // Eğer token varsa Authorization header ekle
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    fetch('http://localhost:5000/api/galeri', { headers })
+      .then(res => {
+        if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
+        return res.json();
+      })
       .then(data => {
         setGaleriOgeleri(data);
         setLoading(false);
@@ -158,16 +167,6 @@ export default function GaleriPage() {
                   ? 'Henüz galeriye iş eklenmemiş'
                   : 'Bu kategoride iş bulunamadı'}
               </p>
-
-              {/* 🔐 Sadece Admin Görür - Admin Panel Linki */}
-              {isAdmin && (
-                <Link
-                  href="/admin-login"
-                  className="inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors"
-                >
-                  Admin Paneline Git
-                </Link>
-              )}
             </div>
           </div>
         )}

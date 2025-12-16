@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SiparisButton from '../components/SiparisButton';
-import { useAuth } from '../contexts/AuthContext';
 
 // Node.js Backend'den gelen veri yapısı
 interface Urun {
@@ -21,12 +20,20 @@ export default function MagazaPage() {
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [loading, setLoading] = useState(true);
   const [hata, setHata] = useState('');
-  const { isAdmin } = useAuth(); // 🔐 Rol kontrolü eklendi
 
   useEffect(() => {
     console.log("Veri çekme işlemi başladı...");
-    
-    fetch('http://localhost:5000/api/urunler')
+
+    // localStorage'dan token'ı al (varsa)
+    const token = localStorage.getItem('token');
+    const headers: HeadersInit = {};
+
+    // Eğer token varsa Authorization header ekle
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    fetch('http://localhost:5000/api/urunler', { headers })
       .then(res => {
         if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
         return res.json();
@@ -118,7 +125,7 @@ export default function MagazaPage() {
         </div>
       </section>
 
-      {/* Ürün Sayısı ve Admin Link */}
+      {/* Ürün Sayısı */}
       <section className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <div className="flex items-center gap-2 text-gray-600">
@@ -127,19 +134,6 @@ export default function MagazaPage() {
             </svg>
             <span className="font-semibold">{urunler.length} Ürün Bulundu</span>
           </div>
-
-          {/* 🔐 Sadece Admin Görür - Yeni Ürün Ekle Butonu */}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Yeni Ürün Ekle
-            </Link>
-          )}
         </div>
       </section>
 
@@ -253,19 +247,6 @@ export default function MagazaPage() {
               <p className="text-gray-500 mb-6 max-w-sm">
                 Şu anda mağazamızda ürün bulunmamaktadır.
               </p>
-              
-              {/* 🔐 Sadece Admin Görür - İlk Ürün Ekle */}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  İlk Ürünü Ekle
-                </Link>
-              )}
             </div>
           </div>
         )}
