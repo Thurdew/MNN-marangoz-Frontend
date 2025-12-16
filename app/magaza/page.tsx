@@ -40,7 +40,7 @@ export default function MagazaPage() {
       })
       .then(data => {
         console.log("Gelen Veriler:", data);
-        setUrunler(data);
+        setUrunler(data.data);
         setLoading(false);
       })
       .catch(err => {
@@ -156,7 +156,7 @@ export default function MagazaPage() {
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                       loading="lazy"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://placeholder.com/400x300?text=Resim+Yok";
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x300?text=Resim+Yok";
                       }}
                     />
                     
