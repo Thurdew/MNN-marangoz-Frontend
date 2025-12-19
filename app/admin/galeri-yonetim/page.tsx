@@ -112,6 +112,7 @@ export default function GaleriYonetimPage() {
         kategori: editForm.kategori,
         musteriAdi: editForm.musteriAdi,
         konum: editForm.konum,
+        resimUrl: editModal.oge.resimUrl, // Mevcut resimleri koru
         tamamlanmaTarihi: editForm.tamamlanmaTarihi || new Date().toISOString()
       };
 
@@ -131,6 +132,7 @@ export default function GaleriYonetimPage() {
 
       if (!response.ok) {
         const data = await response.json();
+        console.error('Backend hatası:', data); // Detaylı hata logu
         throw new Error(data.message || 'Güncelleme başarısız');
       }
 
@@ -138,6 +140,7 @@ export default function GaleriYonetimPage() {
       closeEditModal();
       fetchGaleri();
     } catch (error) {
+      console.error('Güncelleme hatası:', error); // Detaylı hata logu
       showToast(error instanceof Error ? error.message : 'Güncelleme hatası', 'error');
     } finally {
       setSubmitting(false);

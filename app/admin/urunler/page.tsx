@@ -124,6 +124,7 @@ export default function UrunYonetimPage() {
         kategori: editForm.kategori,
         aciklama: editForm.aciklama,
         malzeme: editForm.malzeme,
+        resimUrl: editModal.urun.resimUrl, // Mevcut resimleri koru
         olculer: {
           genislik: editForm.genislik ? parseFloat(editForm.genislik) : undefined,
           yukseklik: editForm.yukseklik ? parseFloat(editForm.yukseklik) : undefined,
@@ -147,6 +148,7 @@ export default function UrunYonetimPage() {
 
       if (!response.ok) {
         const data = await response.json();
+        console.error('Backend hatası:', data); // Detaylı hata logu
         throw new Error(data.message || 'Güncelleme başarısız');
       }
 
@@ -154,6 +156,7 @@ export default function UrunYonetimPage() {
       closeEditModal();
       fetchUrunler();
     } catch (error) {
+      console.error('Güncelleme hatası:', error); // Detaylı hata logu
       showToast(error instanceof Error ? error.message : 'Güncelleme hatası', 'error');
     } finally {
       setSubmitting(false);
