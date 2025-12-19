@@ -315,45 +315,64 @@ export default function AdminPage() {
 
       {/* Seçim Butonları */}
       <section className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <button
-            onClick={() => setEklemeYeri('magaza')}
-            className={`py-4 rounded-xl font-bold text-base transition-all ${
-              eklemeYeri === 'magaza'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
-            }`}
-          >
-            🛒 Mağaza
-          </button>
-          <button
-            onClick={() => setEklemeYeri('galeri')}
-            className={`py-4 rounded-xl font-bold text-base transition-all ${
-              eklemeYeri === 'galeri'
-                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-300'
-            }`}
-          >
-            🖼️ Galeri
-          </button>
-          <Link
-            href="/admin/ayarlar"
-            className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 text-center flex items-center justify-center"
-          >
-            ⚙️ Ayarlar
-          </Link>
-          <Link
-            href="/admin/siparisler"
-            className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 text-center flex items-center justify-center"
-          >
-            📦 Siparişler
-          </Link>
-          <Link
-            href="/admin/teklifler"
-            className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-300 text-center flex items-center justify-center"
-          >
-            📋 Teklifler
-          </Link>
+        <div className="max-w-6xl mx-auto">
+          {/* Ekleme Butonları */}
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
+            <button
+              onClick={() => setEklemeYeri('magaza')}
+              className={`py-4 rounded-xl font-bold text-base transition-all ${
+                eklemeYeri === 'magaza'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
+              }`}
+            >
+              🛒 Mağazaya Ürün Ekle
+            </button>
+            <button
+              onClick={() => setEklemeYeri('galeri')}
+              className={`py-4 rounded-xl font-bold text-base transition-all ${
+                eklemeYeri === 'galeri'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-300'
+              }`}
+            >
+              🖼️ Galeriye İş Ekle
+            </button>
+          </div>
+
+          {/* Yönetim Butonları */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Link
+              href="/admin/urunler"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-center flex items-center justify-center"
+            >
+              📝 Ürün Yönetimi
+            </Link>
+            <Link
+              href="/admin/galeri-yonetim"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 text-center flex items-center justify-center"
+            >
+              🎨 Galeri Yönetimi
+            </Link>
+            <Link
+              href="/admin/ayarlar"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 text-center flex items-center justify-center"
+            >
+              ⚙️ Ayarlar
+            </Link>
+            <Link
+              href="/admin/siparisler"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 text-center flex items-center justify-center"
+            >
+              📦 Siparişler
+            </Link>
+            <Link
+              href="/admin/teklifler"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-300 text-center flex items-center justify-center"
+            >
+              📋 Teklifler
+            </Link>
+          </div>
         </div>
       </section>
 
