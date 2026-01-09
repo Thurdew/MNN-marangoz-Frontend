@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SiparisButton from '../components/SiparisButton';
-import { useAuth } from '../contexts/AuthContext';
 
 // Node.js Backend'den gelen veri yapısı
 interface Urun {
@@ -21,19 +20,31 @@ export default function MagazaPage() {
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [loading, setLoading] = useState(true);
   const [hata, setHata] = useState('');
-  const { isAdmin } = useAuth(); // 🔐 Rol kontrolü eklendi
+
+  // Railway Backend URL
+  const BACKEND_URL = 'https://keen-sparkle-production.up.railway.app';
 
   useEffect(() => {
     console.log("Veri çekme işlemi başladı...");
-    
-    fetch('http://localhost:5000/api/urunler')
+
+    // localStorage'dan token'ı al (varsa)
+    const token = localStorage.getItem('token');
+    const headers: HeadersInit = {};
+
+    // Eğer token varsa Authorization header ekle
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // URL localhost'tan Railway adresine güncellendi
+    fetch(`${BACKEND_URL}/api/urunler`, { headers })
       .then(res => {
         if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
         return res.json();
       })
       .then(data => {
         console.log("Gelen Veriler:", data);
-        setUrunler(data);
+        setUrunler(data.data || []);
         setLoading(false);
       })
       .catch(err => {
@@ -63,7 +74,7 @@ export default function MagazaPage() {
           </svg>
           <h2 className="text-2xl font-bold text-red-600 mb-2">Bağlantı Hatası</h2>
           <p className="text-gray-600 mb-4">{hata}</p>
-          <p className="text-sm text-gray-500">Backend sunucusu çalışıyor mu kontrol edin.</p>
+          <p className="text-sm text-gray-500">İnternet bağlantınızı veya sunucu durumunu kontrol edin.</p>
           <button 
             onClick={() => window.location.reload()} 
             className="mt-6 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all"
@@ -76,10 +87,18 @@ export default function MagazaPage() {
   }
 
   const getImageUrl = (resimUrl: string | string[]): string => {
+    let url = '';
     if (Array.isArray(resimUrl)) {
-      return resimUrl.length > 0 ? resimUrl[0] : 'https://via.placeholder.com/400x300?text=Resim+Yok';
+      url = resimUrl.length > 0 ? resimUrl[0] : '';
+    } else {
+      url = resimUrl;
     }
-    return resimUrl || 'https://via.placeholder.com/400x300?text=Resim+Yok';
+
+    if (!url) return 'https://via.placeholder.com/400x300?text=Resim+Yok';
+    if (url.startsWith('http')) return url;
+    
+    // Resim URL'lerini Railway üzerinden çekecek şekilde tamamlama
+    return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   return (
@@ -118,7 +137,7 @@ export default function MagazaPage() {
         </div>
       </section>
 
-      {/* Ürün Sayısı ve Admin Link */}
+      {/* Ürün Sayısı */}
       <section className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <div className="flex items-center gap-2 text-gray-600">
@@ -127,19 +146,6 @@ export default function MagazaPage() {
             </svg>
             <span className="font-semibold">{urunler.length} Ürün Bulundu</span>
           </div>
-
-          {/* 🔐 Sadece Admin Görür - Yeni Ürün Ekle Butonu */}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Yeni Ürün Ekle
-            </Link>
-          )}
         </div>
       </section>
 
@@ -162,7 +168,7 @@ export default function MagazaPage() {
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                       loading="lazy"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://placeholder.com/400x300?text=Resim+Yok";
+                        (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%239ca3af'%3EResim Yüklenemedi%3C/text%3E%3C/svg%3E";
                       }}
                     />
                     
@@ -170,14 +176,6 @@ export default function MagazaPage() {
                       <span className="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm bg-opacity-90">
                         {urun.kategori}
                       </span>
-                    </div>
-                    
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                       <div className="bg-white/90 p-3 rounded-full shadow-lg transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                          <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                          </svg>
-                       </div>
                     </div>
                   </div>
                 </Link>
@@ -253,19 +251,6 @@ export default function MagazaPage() {
               <p className="text-gray-500 mb-6 max-w-sm">
                 Şu anda mağazamızda ürün bulunmamaktadır.
               </p>
-              
-              {/* 🔐 Sadece Admin Görür - İlk Ürün Ekle */}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  İlk Ürünü Ekle
-                </Link>
-              )}
             </div>
           </div>
         )}

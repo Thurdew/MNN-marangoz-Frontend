@@ -25,6 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
+  // Railway Backend URL
+  const BACKEND_URL = 'https://keen-sparkle-production.up.railway.app';
+
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
@@ -36,7 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (kullaniciAdi: string, sifre: string) => {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    // Localhost yerine Railway adresi kullanıldı
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kullaniciAdi, sifre })

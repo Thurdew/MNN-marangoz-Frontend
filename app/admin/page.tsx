@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
+import ImageUploader from '../components/ImageUploader';
 
 type EklemeYeri = 'magaza' | 'galeri';
 
@@ -13,8 +14,11 @@ export default function AdminPage() {
   
   const [eklemeYeri, setEklemeYeri] = useState<EklemeYeri>('magaza');
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [basari, setBasari] = useState<string | null>(null);
+  const [magazaImageUrls, setMagazaImageUrls] = useState<string[]>([]);
+  const [galeriImageUrls, setGaleriImageUrls] = useState<string[]>([]);
 
   // Mağaza için form data
   const [magazaForm, setMagazaForm] = useState({
@@ -64,10 +68,84 @@ export default function AdminPage() {
     setBasari(null);
   };
 
+  // Resim yükleme fonksiyonu
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    if (files.length === 0) return [];
+
+    if (!token) {
+      alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+      router.push('/admin-login');
+      return [];
+    }
+
+    setUploadingImages(true);
+    setHata(null);
+
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await fetch('https://keen-sparkle-production.up.railway.app/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return [];
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Resimler yüklenirken hata oluştu');
+      }
+
+      // Backend'den dönen URL'leri tam URL'ye çevir
+      const fullUrls = data.urls.map((url: string) => `https://keen-sparkle-production.up.railway.app${url}`);
+      return fullUrls;
+    } catch (error) {
+      setHata(error instanceof Error ? error.message : 'Resim yükleme hatası');
+      return [];
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  // Mağaza resimleri seçildiğinde
+  const handleMagazaImagesSelected = async (files: File[]) => {
+    const urls = await uploadImages(files);
+    if (urls.length > 0) {
+      setMagazaImageUrls(urls);
+      setMagazaForm(prev => ({ ...prev, resimUrl: urls.join(', ') }));
+    }
+  };
+
+  // Galeri resimleri seçildiğinde
+  const handleGaleriImagesSelected = async (files: File[]) => {
+    const urls = await uploadImages(files);
+    if (urls.length > 0) {
+      setGaleriImageUrls(urls);
+      setGaleriForm(prev => ({ ...prev, resimUrl: urls.join(', ') }));
+    }
+  };
+
   const handleMagazaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setHata(null);
+
+    if (!token) {
+      alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+      router.push('/admin-login');
+      return;
+    }
 
     try {
       const resimUrlArray = magazaForm.resimUrl.split(',').map(url => url.trim()).filter(url => url !== '');
@@ -87,14 +165,20 @@ export default function AdminPage() {
         resimUrl: resimUrlArray
       };
 
-      const response = await fetch('http://localhost:5000/api/urunler', {
+      const response = await fetch('https://keen-sparkle-production.up.railway.app/api/urunler', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token || ''
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return;
+      }
 
       const data = await response.json();
 
@@ -107,6 +191,7 @@ export default function AdminPage() {
         ad: '', kod: '', fiyat: '', kategori: 'Mutfak', aciklama: '',
         malzeme: '', genislik: '', yukseklik: '', derinlik: '', resimUrl: ''
       });
+      setMagazaImageUrls([]);
 
       setTimeout(() => setBasari(null), 3000);
 
@@ -122,6 +207,12 @@ export default function AdminPage() {
     setLoading(true);
     setHata(null);
 
+    if (!token) {
+      alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+      router.push('/admin-login');
+      return;
+    }
+
     try {
       const resimUrlArray = galeriForm.resimUrl.split(',').map(url => url.trim()).filter(url => url !== '');
 
@@ -135,14 +226,20 @@ export default function AdminPage() {
         resimUrl: resimUrlArray
       };
 
-      const response = await fetch('http://localhost:5000/api/galeri', {
+      const response = await fetch('https://keen-sparkle-production.up.railway.app/api/galeri', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token || ''
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.status === 401) {
+        alert('Oturumunuz sona erdi, lütfen tekrar giriş yapın');
+        logout();
+        return;
+      }
 
       const data = await response.json();
 
@@ -155,6 +252,7 @@ export default function AdminPage() {
         baslik: '', aciklama: '', kategori: 'Mutfak',
         musteriAdi: '', konum: '', tamamlanmaTarihi: '', resimUrl: ''
       });
+      setGaleriImageUrls([]);
 
       setTimeout(() => setBasari(null), 3000);
 
@@ -217,27 +315,64 @@ export default function AdminPage() {
 
       {/* Seçim Butonları */}
       <section className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto flex gap-4">
-          <button
-            onClick={() => setEklemeYeri('magaza')}
-            className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
-              eklemeYeri === 'magaza'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
-            }`}
-          >
-            🛒 Mağazaya Ürün Ekle
-          </button>
-          <button
-            onClick={() => setEklemeYeri('galeri')}
-            className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
-              eklemeYeri === 'galeri'
-                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-300'
-            }`}
-          >
-            🖼️ Galeriye İş Ekle
-          </button>
+        <div className="max-w-6xl mx-auto">
+          {/* Ekleme Butonları */}
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
+            <button
+              onClick={() => setEklemeYeri('magaza')}
+              className={`py-4 rounded-xl font-bold text-base transition-all ${
+                eklemeYeri === 'magaza'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
+              }`}
+            >
+              🛒 Mağazaya Ürün Ekle
+            </button>
+            <button
+              onClick={() => setEklemeYeri('galeri')}
+              className={`py-4 rounded-xl font-bold text-base transition-all ${
+                eklemeYeri === 'galeri'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-300'
+              }`}
+            >
+              🖼️ Galeriye İş Ekle
+            </button>
+          </div>
+
+          {/* Yönetim Butonları */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Link
+              href="/admin/urunler"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-center flex items-center justify-center"
+            >
+              📝 Ürün Yönetimi
+            </Link>
+            <Link
+              href="/admin/galeri-yonetim"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 text-center flex items-center justify-center"
+            >
+              🎨 Galeri Yönetimi
+            </Link>
+            <Link
+              href="/admin/ayarlar"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 text-center flex items-center justify-center"
+            >
+              ⚙️ Ayarlar
+            </Link>
+            <Link
+              href="/admin/siparisler"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 text-center flex items-center justify-center"
+            >
+              📦 Siparişler
+            </Link>
+            <Link
+              href="/admin/teklifler"
+              className="py-4 rounded-xl font-bold text-base transition-all bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-300 text-center flex items-center justify-center"
+            >
+              📋 Teklifler
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -277,7 +412,7 @@ export default function AdminPage() {
                       value={magazaForm.ad}
                       onChange={handleMagazaChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                       placeholder="Modern Mutfak Dolabı"
                     />
                   </div>
@@ -290,7 +425,7 @@ export default function AdminPage() {
                       value={magazaForm.kod}
                       onChange={handleMagazaChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none uppercase"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none uppercase"
                       placeholder="URN-001"
                     />
                   </div>
@@ -307,7 +442,7 @@ export default function AdminPage() {
                       required
                       min="0"
                       step="0.01"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="25000"
                     />
                   </div>
@@ -319,7 +454,7 @@ export default function AdminPage() {
                       value={magazaForm.kategori}
                       onChange={handleMagazaChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                     >
                       {kategoriler.map(kat => (
                         <option key={kat} value={kat}>{kat}</option>
@@ -336,7 +471,7 @@ export default function AdminPage() {
                     value={magazaForm.malzeme}
                     onChange={handleMagazaChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                     placeholder="Birinci Sınıf MDF"
                   />
                 </div>
@@ -349,7 +484,7 @@ export default function AdminPage() {
                     onChange={handleMagazaChange}
                     required
                     rows={4}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none resize-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none resize-none"
                     placeholder="Ürün açıklaması..."
                   />
                 </div>
@@ -364,7 +499,7 @@ export default function AdminPage() {
                       onChange={handleMagazaChange}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="200"
                     />
                   </div>
@@ -377,7 +512,7 @@ export default function AdminPage() {
                       onChange={handleMagazaChange}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="80"
                     />
                   </div>
@@ -390,23 +525,26 @@ export default function AdminPage() {
                       onChange={handleMagazaChange}
                       min="0"
                       step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
                       placeholder="60"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Resim URL'leri * (virgülle ayırın)</label>
-                  <input
-                    type="text"
-                    name="resimUrl"
-                    value={magazaForm.resimUrl}
-                    onChange={handleMagazaChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
-                    placeholder="https://example.com/1.jpg, https://example.com/2.jpg"
+                  <label className="block text-sm font-semibold text-gray-700 mb-4">
+                    Ürün Resimleri * {uploadingImages && <span className="text-amber-600">(Yükleniyor...)</span>}
+                  </label>
+                  <ImageUploader
+                    onImagesSelected={handleMagazaImagesSelected}
+                    multiple={true}
+                    maxFiles={10}
                   />
+                  {magazaImageUrls.length > 0 && (
+                    <p className="mt-3 text-sm text-green-600 font-semibold">
+                      ✓ {magazaImageUrls.length} resim yüklendi
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -432,7 +570,7 @@ export default function AdminPage() {
                     value={galeriForm.baslik}
                     onChange={handleGaleriChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                     placeholder="Özel Tasarım Mutfak Projesi"
                   />
                 </div>
@@ -445,7 +583,7 @@ export default function AdminPage() {
                       value={galeriForm.kategori}
                       onChange={handleGaleriChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                     >
                       {kategoriler.map(kat => (
                         <option key={kat} value={kat}>{kat}</option>
@@ -460,7 +598,7 @@ export default function AdminPage() {
                       name="tamamlanmaTarihi"
                       value={galeriForm.tamamlanmaTarihi}
                       onChange={handleGaleriChange}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                     />
                   </div>
                 </div>
@@ -473,7 +611,7 @@ export default function AdminPage() {
                       name="musteriAdi"
                       value={galeriForm.musteriAdi}
                       onChange={handleGaleriChange}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                       placeholder="Ahmet Yılmaz"
                     />
                   </div>
@@ -485,7 +623,7 @@ export default function AdminPage() {
                       name="konum"
                       value={galeriForm.konum}
                       onChange={handleGaleriChange}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
+                      className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
                       placeholder="İstanbul, Türkiye"
                     />
                   </div>
@@ -498,22 +636,25 @@ export default function AdminPage() {
                     value={galeriForm.aciklama}
                     onChange={handleGaleriChange}
                     rows={4}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none resize-none"
+                    className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none resize-none"
                     placeholder="İş hakkında detaylı açıklama..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Resim URL'leri * (virgülle ayırın)</label>
-                  <input
-                    type="text"
-                    name="resimUrl"
-                    value={galeriForm.resimUrl}
-                    onChange={handleGaleriChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none"
-                    placeholder="https://example.com/1.jpg, https://example.com/2.jpg"
+                  <label className="block text-sm font-semibold text-gray-700 mb-4">
+                    İş Resimleri * {uploadingImages && <span className="text-amber-600">(Yükleniyor...)</span>}
+                  </label>
+                  <ImageUploader
+                    onImagesSelected={handleGaleriImagesSelected}
+                    multiple={true}
+                    maxFiles={10}
                   />
+                  {galeriImageUrls.length > 0 && (
+                    <p className="mt-3 text-sm text-green-600 font-semibold">
+                      ✓ {galeriImageUrls.length} resim yüklendi
+                    </p>
+                  )}
                 </div>
 
                 <button

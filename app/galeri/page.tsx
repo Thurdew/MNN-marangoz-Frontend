@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '../contexts/AuthContext';
 
 interface GaleriOgesi {
   _id: string;
@@ -19,32 +17,55 @@ export default function GaleriPage() {
   const [galeriOgeleri, setGaleriOgeleri] = useState<GaleriOgesi[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedKategori, setSelectedKategori] = useState<string>('Tümü');
-  const { isAdmin } = useAuth(); // 🔐 Rol kontrolü eklendi
+
+  // Railway Backend URL
+  const BACKEND_URL = 'https://keen-sparkle-production.up.railway.app';
 
   const kategoriler = ['Tümü', 'Mutfak', 'Yatak Odası', 'Salon', 'Banyo', 'Özel Tasarım', 'Diğer'];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/galeri')
-      .then(res => res.json())
+    // localStorage'dan token'ı al (varsa)
+    const token = localStorage.getItem('token');
+    const headers: HeadersInit = {};
+
+    // Eğer token varsa Authorization header ekle
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Localhost yerine Railway adresi kullanıldı
+    fetch(`${BACKEND_URL}/api/galeri`, { headers })
+      .then(res => {
+        if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
+        return res.json();
+      })
       .then(data => {
-        setGaleriOgeleri(data);
+        setGaleriOgeleri(data.data || []);
         setLoading(false);
       })
       .catch(err => {
         console.error('Hata:', err);
         setLoading(false);
       });
-  }, []);
+  }, [BACKEND_URL]);
 
   const filtrelenmisOgeler = selectedKategori === 'Tümü' 
     ? galeriOgeleri 
     : galeriOgeleri.filter(o => o.kategori === selectedKategori);
 
   const getImageUrl = (resimUrl: string | string[]): string => {
+    let url = '';
     if (Array.isArray(resimUrl)) {
-      return resimUrl.length > 0 ? resimUrl[0] : 'https://via.placeholder.com/400x300?text=Resim+Yok';
+      url = resimUrl.length > 0 ? resimUrl[0] : '';
+    } else {
+      url = resimUrl;
     }
-    return resimUrl || 'https://via.placeholder.com/400x300?text=Resim+Yok';
+
+    if (!url) return 'https://via.placeholder.com/400x300?text=Resim+Yok';
+    if (url.startsWith('http')) return url;
+    
+    // Resim yolları Railway sunucusu üzerinden çekilecek şekilde güncellendi
+    return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   if (loading) {
@@ -158,16 +179,6 @@ export default function GaleriPage() {
                   ? 'Henüz galeriye iş eklenmemiş'
                   : 'Bu kategoride iş bulunamadı'}
               </p>
-
-              {/* 🔐 Sadece Admin Görür - Admin Panel Linki */}
-              {isAdmin && (
-                <Link
-                  href="/admin-login"
-                  className="inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors"
-                >
-                  Admin Paneline Git
-                </Link>
-              )}
             </div>
           </div>
         )}
